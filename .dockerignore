@@ -1,0 +1,7 @@
+DockerFile
+README.md
+__pycache__
+.venv
+.vscode
+.gitignore
+test.ipynb
