@@ -1,5 +1,5 @@
 import os
-from flask import Flask
+from flask import Flask, request
 from utils.helper import Helper
 from utils.api import API
 from utils.gcp import GCP
@@ -19,7 +19,13 @@ def hello_world():
 @app.route('/bursa_daily_data', methods=['GET'])
 def get_bursa_daily_data():
     logging.info('Executing get_bursa_daily_data...')
-    pdf_date = date.today().strftime('%Y-%m-%d')
+    args = request.args
+    date = args.get('date')
+    if date is None:
+        pdf_date = date.today().strftime('%Y-%m-%d')
+    else:
+        pdf_date = date
+            
     api.get_bursa_daily_data(pdf_date=pdf_date)
 
     if api.bursa_status == 200 and api.file_name != '':
