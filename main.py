@@ -20,11 +20,11 @@ def hello_world():
 def get_bursa_daily_data():
     logging.info('Executing get_bursa_daily_data...')
     args = request.args
-    date = args.get('date')
-    if date is None:
+    pdf_date = args.get('date')
+    if pdf_date is None:
         pdf_date = date.today().strftime('%Y-%m-%d')
     else:
-        pdf_date = date
+        pdf_date = pdf_date
             
     api.get_bursa_daily_data(pdf_date=pdf_date)
 
@@ -32,6 +32,28 @@ def get_bursa_daily_data():
         logging.info(f'Bursa status { api.bursa_status }...')
         logging.info(f'Downloaded { api.file_name }...')
         df = api.generate_bursa_daily_data()
+        gcp.insert_data_from_dataframe(df, bigquery_schema=os.getenv('GBQ_SCHEMA_STOCK'), bigquery_table=os.getenv('GBQ_TABLE_STOCK'))
+        gcp.upload_storage(bucket_name=os.getenv('GCS_BUCKET_STOCK'), file_name=api.file_name, delete_file=True)
+    
+    logging.info('get_bursa_daily_data executed!')
+    return 'bursa_daily_data executed!'
+
+@app.route('/bursa_daily_data_v2', methods=['GET'])
+def get_bursa_daily_data_v2():
+    logging.info('Executing get_bursa_daily_data...')
+    args = request.args
+    pdf_date = args.get('date')
+    if pdf_date is None:
+        pdf_date = date.today().strftime('%Y%m%d')
+    else:
+        pdf_date = pdf_date
+            
+    api.get_bursa_daily_data_v2(pdf_date=pdf_date)
+
+    if api.bursa_status == 200 and api.file_name != '':
+        logging.info(f'Bursa status { api.bursa_status }...')
+        logging.info(f'Downloaded { api.file_name }...')
+        df = api.generate_bursa_daily_data_v2()
         gcp.insert_data_from_dataframe(df, bigquery_schema=os.getenv('GBQ_SCHEMA_STOCK'), bigquery_table=os.getenv('GBQ_TABLE_STOCK'))
         gcp.upload_storage(bucket_name=os.getenv('GCS_BUCKET_STOCK'), file_name=api.file_name, delete_file=True)
     

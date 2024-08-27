@@ -5,11 +5,20 @@ FROM python:3.10-slim
 # Allow statements and log messages to immediately appear in the logs
 ENV PYTHONUNBUFFERED True
 
+
+# Define Proxy
+ENV http_proxy=deb.debian.org
+ENV https_proxy=deb.debian.org/debian
+
 # Copy local code to the container image.
 ENV APP_HOME /app
 ENV PORT 8080
 WORKDIR $APP_HOME
 COPY . ./
+
+# Install Ghostscript
+RUN apt-get update && apt-get install -y apt-transport-https
+RUN apt-get install -y ghostscript ffmpeg libsm6 libxext6 libgl1
 
 # Install production dependencies.
 RUN pip install --no-cache-dir -r requirements.txt
